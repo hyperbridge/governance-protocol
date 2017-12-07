@@ -1,3 +1,7 @@
-# Hyperbridge Contracts
+# Hyperbridge Protocol
 
-Smart contracts used within the Hyperbridge ecosystem
+The Hyperbridge Protocol project is broken up into 3 areas:
+
+* Smart Contracts (Ethereum)
+* Communication API (JSON.API)
+* Documentation
