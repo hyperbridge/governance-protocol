@@ -1,3 +1,3 @@
-# SkyToken Contract
+# Hyperbridge Contracts
 
-WIP
+Smart contracts used within the Hyperbridge ecosystem
