@@ -14,7 +14,7 @@ pragma solidity >=0.4.19;
 contract UserProfile {
 
   struct appDetails {
-    address addr; // redundant but usefull to include
+    uint id; // redundant but usefull to include
     uint version;
     bool enabled;
     uint permissions; // bitmap for effeciency ;)
@@ -32,7 +32,7 @@ contract UserProfile {
     address addr;
     string data; // json string includes all the profile data we want to store (encrypted by the user)
 
-    mapping (address => appDetails) apps;  // app_address  => app_version_id
+    mapping (uint => appDetails) apps;  // app_address  => app_version_id
     
     mapping (string => Key) keys; // the string is the public_key (theoritically this might be replicated but technically it's very very unlikely)
   }
@@ -58,7 +58,7 @@ contract UserProfile {
   }
   
 
-  function installApp (address addr, uint version) returns(bool res) {
+  function installApp (uint id, uint version) returns(bool res) {
     return true;
   }
 
