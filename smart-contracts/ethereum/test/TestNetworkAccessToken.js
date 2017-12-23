@@ -2,10 +2,12 @@ var NetworkAccessToken = artifacts.require("./NetworkAccessToken.sol");
 
 contract('NetworkAccessToken', function(accounts) {
     it("should put 1000000000 NAT in the first account", function() {
+        var token;
         return NetworkAccessToken.deployed().then(function(instance) {
+            token = instance;
             return instance.balanceOf.call(accounts[0]);
         }).then(function(balance) {
-            assert.equal(balance.valueOf(), 1000000000 * Math.pow(10, 8), "1000000000 wasn't in the first account");
+            assert.equal(balance.valueOf(), 1000000000 * Math.pow(10, token.contract.decimals.call()), "1000000000 wasn't in the first account");
         });
     });
     
