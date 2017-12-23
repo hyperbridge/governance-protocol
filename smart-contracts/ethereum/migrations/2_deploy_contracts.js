@@ -1,8 +1,8 @@
 var ConvertLib = artifacts.require("./ConvertLib.sol");
-var NAT = artifacts.require("./NAT.sol");
+var NetworkAccessToken = artifacts.require("./NetworkAccessToken.sol");
 
-module.exports = function(deployer) {
+module.exports = function (deployer) {
     deployer.deploy(ConvertLib);
-    deployer.link(ConvertLib, NAT);
-    deployer.deploy(NAT);
+    deployer.link(ConvertLib, NetworkAccessToken);
+    deployer.deploy(NetworkAccessToken);
 };

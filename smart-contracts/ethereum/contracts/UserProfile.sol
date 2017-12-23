@@ -1,7 +1,4 @@
-pragma solidity >=0.4.19;
-
-
-
+pragma solidity ^0.4.15;
 
 /**
  * The userProfile contract:
@@ -9,10 +6,7 @@ pragma solidity >=0.4.19;
  * - access list of the installed apps
  * - data refs
  */
-
-
 contract UserProfile {
-
   struct appDetails {
     uint id; // redundant but usefull to include
     uint version;
@@ -27,7 +21,6 @@ contract UserProfile {
     string chain_symbol; // will leave this for the extension to use it as a reference
   }
 
-
   struct Profile {
     address addr;
     string data; // json string includes all the profile data we want to store (encrypted by the user)
@@ -38,40 +31,35 @@ contract UserProfile {
   }
 
   mapping (address => Profile) users;
-  
 
-  function UserProfile () {
+  function UserProfile () public {
     
   }
 
-  function register (string data) returns(bool res) {
+  function register (string data) public returns(bool res) {
     require (users[msg.sender].addr == msg.sender);
-
 
     users[msg.sender] = Profile({addr: msg.sender, data: data});
     return true;
   }
-  
 
-  function getDefaultPermissions () returns(uint res) {
+  function getDefaultPermissions () public pure returns(uint res) {
     return 256;
   }
-  
 
-  function installApp (uint id, uint version) returns(bool res) {
+  function installApp () public pure returns(bool res) { // TODO: uint id, uint version
     return true;
   }
 
-  function removeApp () returns(bool res) {
+  function removeApp () public pure returns(bool res) {
     return true;
   }
 
-  function disableApp () returns(bool res) {
+  function disableApp () public pure returns(bool res) {
     return true;
   }
 
-  function changePermissions (address addr, uint perm) returns(bool res) {
+  function changePermissions () public pure returns(bool res) { // TODO: address addr, uint perm
     return true;
   }
-  
 }
