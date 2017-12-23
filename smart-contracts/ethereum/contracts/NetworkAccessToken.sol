@@ -1,29 +1,28 @@
 /** 
- * latest solidity release as of (Dec 11, 2017). 
- * we can roll back to an older version in case major bugs discovered but it seems stable
+ * Latest solidity release as of (Dec 11, 2017). 
 **/
-pragma solidity ^0.4.19; 
+pragma solidity ^0.4.15; 
 
 library SafeMath {
-  function mul(uint256 a, uint256 b) internal constant returns (uint256) {
+  function mul(uint256 a, uint256 b) internal pure returns (uint256) {
     uint256 c = a * b;
     assert(a == 0 || c / a == b);
     return c;
   }
 
-  function div(uint256 a, uint256 b) internal constant returns (uint256) {
+  function div(uint256 a, uint256 b) internal pure returns (uint256) {
     // assert(b > 0); // Solidity automatically throws when dividing by 0
     uint256 c = a / b;
     // assert(a == b * c + a % b); // There is no case in which this doesn't hold
     return c;
   }
 
-  function sub(uint256 a, uint256 b) internal constant returns (uint256) {
+  function sub(uint256 a, uint256 b) internal pure returns (uint256) {
     assert(b <= a);
     return a - b;
   }
 
-  function add(uint256 a, uint256 b) internal constant returns (uint256) {
+  function add(uint256 a, uint256 b) internal pure returns (uint256) {
     uint256 c = a + b;
     assert(c >= a);
     return c;
@@ -33,15 +32,13 @@ library SafeMath {
 contract Ownable {
   address public owner;
 
-
   /**
    * @dev The Ownable constructor sets the original `owner` of the contract to the sender
    * account.
    */
-  function Ownable() {
+  function Ownable() public {
     owner = msg.sender;
   }
-
 
   /**
    * @dev Throws if called by any account other than the owner.
@@ -51,23 +48,22 @@ contract Ownable {
     _;
   }
 
-
   /**
    * @dev Allows the current owner to transfer control of the contract to a newOwner.
    * @param newOwner The address to transfer ownership to.
    */
-  function transferOwnership(address newOwner) onlyOwner {
+  function transferOwnership(address newOwner) public onlyOwner {
     if (newOwner != address(0)) {
       owner = newOwner;
     }
   }
-
 }
 
 contract Pausable is Ownable {
   event Pause();
   event Unpause();
   bool public paused = false;
+
   /**
    * @dev Modifier to make a function callable only when the contract is not paused.
    */
@@ -75,6 +71,7 @@ contract Pausable is Ownable {
     require(!paused);
     _;
   }
+
   /**
    * @dev Modifier to make a function callable only when the contract is paused.
    */
@@ -82,6 +79,7 @@ contract Pausable is Ownable {
     require(paused);
     _;
   }
+
   /**
    * @dev called by the owner to pause, triggers stopped state
    */
@@ -89,6 +87,7 @@ contract Pausable is Ownable {
     paused = true;
     Pause();
   }
+
   /**
    * @dev called by the owner to unpause, returns to normal state
    */
@@ -101,8 +100,8 @@ contract Pausable is Ownable {
 
 contract ERC20Basic {
   uint256 public totalSupply;
-  function balanceOf(address who) constant returns (uint256);
-  function transfer(address to, uint256 value) returns (bool);
+  function balanceOf(address who) public constant returns (uint256);
+  function transfer(address to, uint256 value) public returns (bool);
   
   event Transfer(address indexed _from, address indexed _to, uint _value);
 }
@@ -117,7 +116,7 @@ contract BasicToken is ERC20Basic {
   * @param _to The address to transfer to.
   * @param _value The amount to be transferred.
   */
-  function transfer(address _to, uint256 _value) returns (bool) {
+  function transfer(address _to, uint256 _value) public returns (bool) {
     balances[msg.sender] = balances[msg.sender].sub(_value);
     balances[_to] = balances[_to].add(_value);
     Transfer(msg.sender, _to, _value);
@@ -129,24 +128,21 @@ contract BasicToken is ERC20Basic {
   * @param _owner The address to query the the balance of. 
   * @return An uint256 representing the amount owned by the passed address.
   */
-  function balanceOf(address _owner) constant returns (uint256 balance) {
+  function balanceOf(address _owner) public constant returns (uint256 balance) {
     return balances[_owner];
   }
-
 }
 
 contract ERC20 is ERC20Basic {
-  function allowance(address owner, address spender) constant returns (uint256);
-  function transferFrom(address from, address to, uint256 value) returns (bool);
-  function approve(address spender, uint256 value) returns (bool);
+  function allowance(address owner, address spender) public constant returns (uint256);
+  function transferFrom(address from, address to, uint256 value) public returns (bool);
+  function approve(address spender, uint256 value) public returns (bool);
   
   event Approval(address indexed _owner, address indexed _spender, uint _value);
 }
 
 contract StandardToken is ERC20, BasicToken {
-
   mapping (address => mapping (address => uint256)) allowed;
-
 
   /**
    * @dev Transfer tokens from one address to another
@@ -154,7 +150,7 @@ contract StandardToken is ERC20, BasicToken {
    * @param _to address The address which you want to transfer to
    * @param _value uint256 the amout of tokens to be transfered
    */
-  function transferFrom(address _from, address _to, uint256 _value) returns (bool) {
+  function transferFrom(address _from, address _to, uint256 _value) public returns (bool) {
     var _allowance = allowed[_from][msg.sender];
 
     // Check is not needed because sub(_allowance, _value) will already throw if this condition is not met
@@ -172,8 +168,7 @@ contract StandardToken is ERC20, BasicToken {
    * @param _spender The address which will spend the funds.
    * @param _value The amount of tokens to be spent.
    */
-  function approve(address _spender, uint256 _value) returns (bool) {
-
+  function approve(address _spender, uint256 _value) public returns (bool) {
     // To change the approve amount you first have to reduce the addresses`
     //  allowance to zero by calling `approve(_spender, 0)` if it is not
     //  already 0 to mitigate the race condition described here:
@@ -191,25 +186,23 @@ contract StandardToken is ERC20, BasicToken {
    * @param _spender address The address which will spend the funds.
    * @return A uint256 specifing the amount of tokens still avaible for the spender.
    */
-  function allowance(address _owner, address _spender) constant returns (uint256 remaining) {
+  function allowance(address _owner, address _spender) public constant returns (uint256 remaining) {
     return allowed[_owner][_spender];
   }
 
   // note from 0xwalid:  we can add increase/decrease approval to reduce the number of calls
 }
 
-
-
 contract NetworkAccessToken is StandardToken, Pausable {
-  string public constant name = 'HyperBridge Network Access Token';            // Set the token name for display
-  string public constant symbol = 'NAT';                                       // Set the token symbol for display
-  uint8 public constant decimals = 8;                                          // Set the number of decimals for display
-  uint256 public constant total_supply = 1000000000 * 10**uint256(decimals);  // 1 billion NAT specified in Grains
+  string public constant name = 'Network Access Token';
+  string public constant symbol = 'NAT';
+  uint8 public constant decimals = 8;
+  uint256 public constant total_supply = 1000000000 * 10**uint256(decimals); // 1 billion
   
   // validate if the _to address is not 0x0 or the address of this contract
-  modifier validDestination( address to ) {
+  modifier validDestination(address to) {
     require(to != address(0x0));
-    require(to != address(this) );
+    require(to != address(this));
     _;
   }
 
@@ -218,34 +211,37 @@ contract NetworkAccessToken is StandardToken, Pausable {
    * Runs only on initial contract creation.
    */
 
-  function NetworkAccessToken() {
-    totalSupply = total_supply;                               // Set the total supply
-    balances[msg.sender] = total_supply;                      // Creator address is assigned all
+  function NetworkAccessToken() public {
+    totalSupply = total_supply;
+    balances[msg.sender] = total_supply; // Creator address is assigned all
     Transfer(0x0, msg.sender, total_supply);
   }
+
   /**
    * @dev Transfer token for a specified address when not paused
    * @param _to The address to transfer to.
    * @param _value The amount to be transferred.
    */
-  function transfer(address _to, uint256 _value) whenNotPaused validDestination(_to) returns (bool) {
+  function transfer(address _to, uint256 _value) whenNotPaused validDestination(_to) public returns (bool) {
     return super.transfer(_to, _value);
   }
+
   /**
    * @dev Transfer tokens from one address to another when not paused
    * @param _from address The address which you want to send tokens from
    * @param _to address The address which you want to transfer to
    * @param _value uint256 the amount of tokens to be transferred
    */
-  function transferFrom(address _from, address _to, uint256 _value) whenNotPaused validDestination(_to) returns (bool) {
+  function transferFrom(address _from, address _to, uint256 _value) whenNotPaused validDestination(_to) public returns (bool) {
     return super.transferFrom(_from, _to, _value);
   }
+
   /**
    * @dev Aprove the passed address to spend the specified amount of tokens on behalf of msg.sender when not paused.
    * @param _spender The address which will spend the funds.
    * @param _value The amount of tokens to be spent.
    */
-  function approve(address _spender, uint256 _value) whenNotPaused returns (bool) {
+  function approve(address _spender, uint256 _value) whenNotPaused public returns (bool) {
     return super.approve(_spender, _value);
   }
 }
