@@ -9,52 +9,48 @@ import "./Republic.sol";
  */
 contract RepublicVote {
   modifier onlyDelegate() {
-    bool exists = false;
-
-    for(uint i = 0; i < delegates.length; ++i) {
-        if (delegates[i] == msg.sender) {
-            exists = true;
-        }
-    }
-
-    require(exists);
+    require(delegates[msg.sender]);
     _;
   }
 
   Republic republic;
-  address[11] public delegates;
-  mapping (address => mapping (address => uint)) public nominees;
-  mapping (address => uint) public voters;
+  mapping (address => bool) delegates;
+  address[11] delegateAddresses;
+  mapping (address => mapping (address => uint)) nominees;
+  mapping (address => uint) voters;
   
   function RepublicVote() public {
-    for(uint i = 0; i < delegates.length; ++i) {
-        delegates[i] = msg.sender;
-    }
+    delegates[msg.sender] = true;
   }
 
   // TODO: add onlyDelegate modifier
   function initRepublic(address _republic) public payable returns(bool res) {
     republic = Republic(_republic);
-    delegates = republic.getDelegates();
+    delegateAddresses = republic.getDelegateAddresses();
+
+    for(uint256 i; i < delegateAddresses.length; i++) {
+      delegates[delegateAddresses[i]] = true;
+    }
+
     return true;
   }
 
-  function getDelegates() public view returns(address[11] res) {
-    return delegates;
+  function getDelegateAddresses() public view returns(address[11] res) {
+    return republic.getDelegateAddresses();
   }
 
-  function register() public payable returns(bool res) {
+  function registerVoter() public payable returns(bool res) {
     NetworkAccessToken token = NetworkAccessToken(msg.sender);
     voters[msg.sender] = token.balanceOf(msg.sender);
     return true;
   }
 
-  function vote(address nominee) public payable returns(bool res) {
+  function startVote(address nominee) public payable returns(bool res) {
     nominees[nominee][msg.sender] = voters[msg.sender];
     return true;
   }
 
-  function tally() onlyDelegate public view returns(bool res) {
+  function tallyVote() onlyDelegate public view returns(bool res) {
     return true;
   }
 }

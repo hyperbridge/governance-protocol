@@ -8,15 +8,7 @@ import "./RepublicVote.sol";
  */
 contract Republic {
   modifier onlyDelegate() {
-    bool exists = false;
-
-    for(uint i = 0; i < delegates.length; ++i) {
-        if (delegates[i] == msg.sender) {
-            exists = true;
-        }
-    }
-
-    require(exists);
+    require(delegates[msg.sender]);
     _;
   }
 
@@ -27,16 +19,23 @@ contract Republic {
     string url;
   }
 
-  address[11] delegates;
+  mapping (address => bool) delegates;
+  address[11] delegateAddresses;
+  uint256 currentDelegateIndex;
   
   function Republic() public {
-    for(uint i = 0; i < delegates.length; ++i) {
-        delegates[i] = msg.sender;
-    }
+    addDelegate(msg.sender);
   }
 
-  function getDelegates() public view returns(address[11] res) {
-    return delegates;
+  function addDelegate(address delegate) public payable returns(bool res) {
+      delegates[delegate] = true;
+      delegateAddresses[currentDelegateIndex] = delegate;
+      currentDelegateIndex++;
+      return true;
+  }
+
+  function getDelegateAddresses() public view returns(address[11] res) {
+    return delegateAddresses;
   }
 
   function createVote() onlyDelegate public view returns(bool res) { // TODO: string name, uint version, string files, string checksum

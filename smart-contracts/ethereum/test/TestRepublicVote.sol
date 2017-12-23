@@ -12,9 +12,9 @@ contract TestRepublicVote {
 
         vote.initRepublic(DeployedAddresses.Republic());
 
-        address expected = republic.getDelegates()[0];
+        address expected = republic.getDelegateAddresses()[0];
 
-        Assert.equal(vote.getDelegates()[0], expected, "Initial delegates should match Republic");
+        Assert.equal(vote.getDelegateAddresses()[0], expected, "Initial delegates should match Republic");
     }
 
 }
