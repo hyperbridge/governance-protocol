@@ -193,8 +193,6 @@ contract StandardToken is ERC20, BasicToken {
   // note from 0xwalid:  we can add increase/decrease approval to reduce the number of calls
 }
 
-
-
 contract NetworkAccessToken is StandardToken, Pausable {
   string public constant name = 'Network Access Token';
   string public constant symbol = 'NAT';
@@ -202,7 +200,7 @@ contract NetworkAccessToken is StandardToken, Pausable {
   uint256 public constant total_supply = 1000000000 * 10**uint256(decimals); // 1 billion
   
   // validate if the _to address is not 0x0 or the address of this contract
-  modifier validDestination( address to ) {
+  modifier validDestination(address to) {
     require(to != address(0x0));
     require(to != address(this));
     _;

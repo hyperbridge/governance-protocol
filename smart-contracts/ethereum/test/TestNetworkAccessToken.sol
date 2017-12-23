@@ -9,9 +9,9 @@ contract TestNetworkAccessToken {
     function testInitialBalanceUsingDeployedContract() public payable {
         NetworkAccessToken token = NetworkAccessToken(DeployedAddresses.NetworkAccessToken());
 
-        uint expected = 100000000000000000;
+        uint expected = 1000000000 * 10**uint256(8);
 
-        Assert.equal(token.balanceOf(tx.origin), expected, "Owner should have 100000000000000000 NAT initially");
+        Assert.equal(token.balanceOf(tx.origin), expected, "Owner should have 1000000000 NAT initially");
     }
 
     function testInitialBalanceWithNewNAT() public payable {
