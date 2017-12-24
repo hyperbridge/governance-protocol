@@ -1,6 +1,6 @@
 pragma solidity ^0.4.15;
 
-import "./RepublicVote.sol";
+import "./RepublicPrimaryElection.sol";
 
 /**
  * The Republic contract:
@@ -22,27 +22,54 @@ contract Republic {
   mapping (address => bool) delegates;
   address[11] delegateAddresses;
   uint256 currentDelegateIndex;
-  
+
+  mapping (address => bool) elections;
+  address[] electionAddresses;
+  uint256 currentElectionIndex;
+
   function Republic() public {
     addDelegate(msg.sender);
   }
 
   function addDelegate(address delegate) public payable returns(bool res) {
-      delegates[delegate] = true;
-      delegateAddresses[currentDelegateIndex] = delegate;
-      currentDelegateIndex++;
-      return true;
+    delegates[delegate] = true;
+    delegateAddresses[currentDelegateIndex] = delegate;
+    currentDelegateIndex++;
+    
+    return true;
   }
 
   function getDelegateAddresses() public view returns(address[11] res) {
     return delegateAddresses;
   }
 
-  function createVote() onlyDelegate public view returns(bool res) { // TODO: string name, uint version, string files, string checksum
-    return true;
+  function startElection() onlyDelegate public view returns(RepublicPrimaryElection res) { // TODO: string name, uint version, string files, string checksum
+    RepublicPrimaryElection election = new RepublicPrimaryElection();
+
+    electionAddresses.push(election);
+    currentElectionIndex = electionAddresses.length - 1;
+    elections[election] = true;
+
+    election.start();
+    
+    return election;
   }
 
-  function endVote() onlyDelegate public view returns(bool res) { // TODO: uint id, bool vote
+  function endElection() onlyDelegate public view returns(bool res) { // TODO: uint id, bool vote
+    RepublicPrimaryElection currentElection = RepublicPrimaryElection(electionAddresses[currentElectionIndex]);
+
+    uint256 electionResult = currentElection.tallyVotes();
+
+    if (electionResult == 1) {
+        // Successful election
+
+    } else {
+        // Log unsuccessful election reason
+
+    }
+
+
+
     return true;
   }
 }
