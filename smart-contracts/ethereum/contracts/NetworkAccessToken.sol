@@ -207,7 +207,7 @@ contract NetworkAccessToken is StandardToken, Pausable {
   }
 
   /**
-   * @dev SesnseToken Constructor
+   * @dev NetworkAccessToken Constructor
    * Runs only on initial contract creation.
    */
 
