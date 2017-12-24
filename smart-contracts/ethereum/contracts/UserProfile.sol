@@ -1,13 +1,6 @@
-pragma solidity ^0.4.15;
-
-/**
- * The userProfile contract:
- * - Verify users
- * - access list of the installed apps
- * - data refs
- */
 contract UserProfile {
-  struct appDetails {
+
+  struct App {
     uint id; // redundant but usefull to include
     uint version;
     bool enabled;
@@ -21,23 +14,45 @@ contract UserProfile {
     string chain_symbol; // will leave this for the extension to use it as a reference
   }
 
+  modifier onlyOwner() {
+    require(msg.sender == owner);
+    _;
+  }
+  
+
+  modifier userOnly() { 
+    require (users[msg.sender].addr != msg.sender); 
+    _; 
+  }
+
+  modifier hasApp(uint _id) {
+    require(users[msg.sender].apps[_id].id != _id); 
+    _; 
+  }
+
   struct Profile {
     address addr;
     string data; // json string includes all the profile data we want to store (encrypted by the user)
 
-    mapping (uint => appDetails) apps;  // app_address  => app_version_id
+    mapping (uint => App) apps;  // app_address  => app_version_id
     
     mapping (string => Key) keys; // the string is the public_key (theoritically this might be replicated but technically it's very very unlikely)
   }
 
   mapping (address => Profile) users;
+  
+  address market_place;
 
-  function UserProfile () public {
-    
+  address owner;
+
+
+  function UserProfile() public {
+    owner = msg.sender;
   }
 
+
   function register (string data) public returns(bool res) {
-    require (users[msg.sender].addr == msg.sender);
+    require (users[msg.sender].addr != msg.sender);
 
     users[msg.sender] = Profile({addr: msg.sender, data: data});
     return true;
@@ -47,19 +62,33 @@ contract UserProfile {
     return 256;
   }
 
-  function installApp () public pure returns(bool res) { // TODO: uint id, uint version
-    return true;
+  function installApp (uint _id, uint _version) public userOnly returns(bool res) {
+    require(users[msg.sender].apps[_id].version != _version);
+
+    MarketPlace market = MarketPlace(market_place);
+    var (owner_addr, name, category, files, status, checksum) = market.getApp(_id, _version); // will raise unused vars warning. ignore for now
+
+    if (status == "approved") {
+        users[msg.sender].apps[_id] = App(_id, _version, true, getDefaultPermissions());
+        return true;
+    }
+
+    return false;
   }
 
-  function removeApp () public pure returns(bool res) {
-    return true;
-  }
+//   function removeApp () userOnly hasApp returns(bool res)  {
+//     return true;
+//   }
 
-  function disableApp () public pure returns(bool res) {
-    return true;
-  }
+//   function disableApp () userOnly hasApp returns(bool res)  {
+//     return true;
+//   }
 
-  function changePermissions () public pure returns(bool res) { // TODO: address addr, uint perm
-    return true;
-  }
+//   function changePermissions (address addr, uint perm) userOnly hasApp returns(bool res) {
+//     return true;
+//   }
+
+    function setMarketPlace(address addr) public onlyOwner {
+        market_place = addr;
+    }
 }
