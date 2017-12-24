@@ -1,4 +1,4 @@
-pragma solidity >=0.4.19;
+pragma solidity >=0.4.15;
 
 contract MarketPlace {
 
@@ -10,7 +10,7 @@ contract MarketPlace {
   struct AppVersion {
     uint version;
     string files;
-    string status;
+    bytes32 status;
     string checksum;
     uint required_permissions;
   }
@@ -57,10 +57,9 @@ contract MarketPlace {
     return true;
   }
   
-  function getApp(uint _id, uint _version) public view returns(address owner, string name, string category, string files, string status, string checksum) {
+  function getApp(uint _id, uint _version) public view returns(address owner, string name, string category, string files, bytes32 status, string checksum) {
     require (apps[_id].id == _id && apps[_id].versions[_version].version == _version);
 
     return (apps[_id].owner, apps[_id].name, apps[_id].category, apps[_id].versions[_version].files, apps[_id].versions[_version].status, apps[_id].versions[_version].checksum);
   }
-
 }

@@ -1,3 +1,7 @@
+pragma solidity >=0.4.15;
+
+import "./MarketPlace.sol";
+
 contract UserProfile {
 
   struct App {
@@ -88,7 +92,7 @@ contract UserProfile {
 //     return true;
 //   }
 
-    function setMarketPlace(address addr) public onlyOwner {
-        market_place = addr;
-    }
+  function setMarketPlace(address addr) public onlyOwner {
+      market_place = addr;
+  }
 }
