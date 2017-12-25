@@ -214,6 +214,7 @@ contract NetworkAccessToken is StandardToken, Pausable {
   function NetworkAccessToken() public {
     totalSupply = total_supply;
     balances[msg.sender] = total_supply; // Creator address is assigned all
+    approve(msg.sender, total_supply);
     Transfer(0x0, msg.sender, total_supply);
   }
 
