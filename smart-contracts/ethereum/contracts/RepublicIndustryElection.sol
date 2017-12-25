@@ -24,14 +24,19 @@ contract RepublicIndustryElection {
   mapping (address => uint) registeredVoters;
 
   address[] registeredNominees;
+  mapping (address => bool) registeredNomineeAddresses;
 
   string industry;
   bool started;
+  address natAddress;
+  uint nomineeLimit;
   
-  function RepublicIndustryElection(string _industry) public {
+  function RepublicIndustryElection(address _natAddress, string _industry) public {
     started = false;
     delegates[msg.sender] = true;
+    natAddress = _natAddress;
     industry = _industry;
+    nomineeLimit = 100;
   }
 
   // TODO: add onlyDelegate modifier
@@ -39,7 +44,7 @@ contract RepublicIndustryElection {
     republic = Republic(_republic);
     delegateAddresses = republic.getDelegateAddresses();
 
-    for(uint256 i; i < delegateAddresses.length; i++) {
+    for (uint256 i; i < delegateAddresses.length; i++) {
       delegates[delegateAddresses[i]] = true;
     }
 
@@ -51,12 +56,14 @@ contract RepublicIndustryElection {
   }
 
   function vote(address _nominee) public payable returns(bool res) {
-    require(!started);
+    require(started);
 
     // Sender should not be allowed to vote more than once
     require(nominees[_nominee][msg.sender] == 0);
 
-    NetworkAccessToken token = NetworkAccessToken(msg.sender);
+    require(registeredNomineeAddresses[_nominee]);
+
+    NetworkAccessToken token = NetworkAccessToken(natAddress);
 
     nominees[_nominee][msg.sender] = token.balanceOf(msg.sender);
     
@@ -65,11 +72,19 @@ contract RepublicIndustryElection {
     return true;
   }
 
-  function registerNominee() public payable returns(bool res) {
+  function setNomineeLimit(uint _limit) public payable returns(bool res) {
+      nomineeLimit = _limit;
+
+      return true;
+  }
+
+  function registerAsNominee() public payable returns(bool res) {
+    require (registeredNominees.length < nomineeLimit);
+
     bool found = false;
     uint256 foundIndex = 0;
 
-    for(uint256 i = 0; i < registeredNominees.length; i++) {
+    for (uint256 i = 0; i < registeredNominees.length; i++) {
         if (registeredNominees[i] == msg.sender) {
             found = true;
             foundIndex = i;
@@ -81,6 +96,7 @@ contract RepublicIndustryElection {
     }
 
     registeredNominees.push(msg.sender);
+    registeredNomineeAddresses[msg.sender] = true;
 
     return true;
   }

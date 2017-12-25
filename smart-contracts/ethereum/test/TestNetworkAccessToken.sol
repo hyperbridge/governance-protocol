@@ -14,12 +14,12 @@ contract TestNetworkAccessToken {
         Assert.equal(token.balanceOf(tx.origin), expected, "Owner should have 1000000000 NAT initially");
     }
 
-    function testInitialBalanceWithNewNAT() public payable {
+    function testInitialBalanceWithNewToken() public payable {
         NetworkAccessToken token = new NetworkAccessToken();
 
-        uint expected = 0;
+        uint expected = 1000000000 * 10**uint256(token.decimals());
 
-        Assert.equal(token.balanceOf(tx.origin), expected, "Owner should have 0 NAT initially");
+        Assert.equal(token.balanceOf(msg.sender), expected, "Owner should have 1000000000 NAT initially");
     }
 
 }

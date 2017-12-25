@@ -19,6 +19,8 @@ contract Republic {
     string url;
   }
 
+  address natAddress;
+
   mapping (address => bool) delegates;
   address[11] delegateAddresses;
   uint256 currentDelegateIndex;
@@ -27,8 +29,9 @@ contract Republic {
   address[] electionAddresses;
   uint256 currentElectionIndex;
 
-  function Republic() public {
+  function Republic(address _natAddress) public {
     addDelegate(msg.sender);
+    natAddress = _natAddress;
   }
 
   function addDelegate(address delegate) public payable returns(bool res) {
@@ -44,7 +47,7 @@ contract Republic {
   }
 
   function startElection() onlyDelegate public view returns(RepublicPrimaryElection res) { // TODO: string name, uint version, string files, string checksum
-    RepublicPrimaryElection election = new RepublicPrimaryElection();
+    RepublicPrimaryElection election = new RepublicPrimaryElection(natAddress);
 
     electionAddresses.push(election);
     currentElectionIndex = electionAddresses.length - 1;

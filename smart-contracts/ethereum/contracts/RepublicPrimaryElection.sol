@@ -18,6 +18,7 @@ contract RepublicPrimaryElection {
   }
 
   Republic republic;
+  address natAddress;
 
   mapping (address => bool) delegates;
   address[11] delegateAddresses;
@@ -39,11 +40,12 @@ contract RepublicPrimaryElection {
     "Health & Wellness"
   ];
   
-  function RepublicPrimaryElection() public {
+  function RepublicPrimaryElection(address _natAddress) public {
     delegates[msg.sender] = true;
+    natAddress = _natAddress;
 
-    for(uint256 i; i < industries.length; i++) {
-      industryElections[i] = new RepublicIndustryElection(industries[i]);
+    for (uint256 i; i < industries.length; i++) {
+      industryElections[i] = new RepublicIndustryElection(natAddress, industries[i]);
     }
   }
 
@@ -52,7 +54,7 @@ contract RepublicPrimaryElection {
     republic = _republic;
     delegateAddresses = republic.getDelegateAddresses();
 
-    for(uint256 i; i < delegateAddresses.length; i++) {
+    for (uint256 i; i < delegateAddresses.length; i++) {
       delegates[delegateAddresses[i]] = true;
     }
 
@@ -64,7 +66,7 @@ contract RepublicPrimaryElection {
   }
 
   function start() public payable returns(bool res) {
-    for(uint256 i; i < industryElections.length; i++) {
+    for (uint256 i; i < industryElections.length; i++) {
       industryElections[i].start();
     }
 
@@ -81,13 +83,13 @@ contract RepublicPrimaryElection {
 
     // End the industry elections
     // Choose the top 11 industry winners as the delegates
-    for(uint256 i; i < industryElections.length; i++) {
+    for (uint256 i; i < industryElections.length; i++) {
       address winner1 = industryElections[i].end();
 
       industryWinnerAddresses[i] = winner1;
     }
 
-    for(uint256 j; j < industryElections.length; j++) {
+    for (uint256 j; j < industryElections.length; j++) {
       address winner2 = industryElections[j].end();
 
       industryWinnerAddresses[j] = winner2;
