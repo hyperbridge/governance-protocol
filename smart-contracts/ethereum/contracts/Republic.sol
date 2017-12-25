@@ -34,9 +34,9 @@ contract Republic {
     natAddress = _natAddress;
   }
 
-  function addDelegate(address delegate) public payable returns(bool res) {
-    delegates[delegate] = true;
-    delegateAddresses[currentDelegateIndex] = delegate;
+  function addDelegate(address _delegate) public payable returns(bool res) {
+    delegates[_delegate] = true;
+    delegateAddresses[currentDelegateIndex] = _delegate;
     currentDelegateIndex++;
     
     return true;
@@ -46,7 +46,7 @@ contract Republic {
     return delegateAddresses;
   }
 
-  function startElection() onlyDelegate public view returns(RepublicPrimaryElection res) { // TODO: string name, uint version, string files, string checksum
+  function startElection() onlyDelegate public view returns(RepublicPrimaryElection res) {
     RepublicPrimaryElection election = new RepublicPrimaryElection(natAddress);
 
     electionAddresses.push(election);
@@ -58,7 +58,7 @@ contract Republic {
     return election;
   }
 
-  function endElection() onlyDelegate public view returns(bool res) { // TODO: uint id, bool vote
+  function endElection() onlyDelegate public view returns(bool res) {
     RepublicPrimaryElection currentElection = RepublicPrimaryElection(electionAddresses[currentElectionIndex]);
 
     uint256 electionResult = currentElection.tallyVotes();
@@ -70,8 +70,6 @@ contract Republic {
         // Log unsuccessful election reason
 
     }
-
-
 
     return true;
   }
