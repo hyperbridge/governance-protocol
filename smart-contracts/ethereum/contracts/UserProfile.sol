@@ -6,7 +6,7 @@ contract UserProfile {
 
   struct App {
     uint id; // redundant but usefull to include
-    uint version;
+    bytes32 version;
     bool enabled;
     uint permissions; // bitmap for effeciency ;)
   }
@@ -25,12 +25,12 @@ contract UserProfile {
   
 
   modifier userOnly() { 
-    require (users[msg.sender].addr != msg.sender); 
+    require(users[msg.sender].addr == msg.sender); 
     _; 
   }
 
   modifier hasApp(uint _id) {
-    require(users[msg.sender].apps[_id].id != _id); 
+    require(users[msg.sender].apps[_id].id == _id); 
     _; 
   }
 
@@ -38,7 +38,7 @@ contract UserProfile {
     address addr;
     string data; // json string includes all the profile data we want to store (encrypted by the user)
 
-    mapping (uint => App) apps;  // app_address  => app_version_id
+    mapping (uint => App) apps;  // app_id  => app_version_id
     
     mapping (string => Key) keys; // the string is the public_key (theoritically this might be replicated but technically it's very very unlikely)
   }
@@ -66,7 +66,7 @@ contract UserProfile {
     return 256;
   }
 
-  function installApp (uint _id, uint _version) public userOnly returns(bool res) {
+  function installApp (uint _id, bytes32 _version) public userOnly returns(bool res) {
     require(users[msg.sender].apps[_id].version != _version);
 
     MarketPlace market = MarketPlace(market_place);
