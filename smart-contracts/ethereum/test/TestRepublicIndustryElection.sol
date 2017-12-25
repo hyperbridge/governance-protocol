@@ -9,7 +9,7 @@ import "../contracts/RepublicIndustryElection.sol";
 
 contract TestRepublicIndustryElection {
 
-    function testVote() public payable {
+    function testRealVote() public payable {
         RepublicIndustryElection election = new RepublicIndustryElection(DeployedAddresses.NetworkAccessToken(), "AI & IoT");
 
         election.start();
@@ -24,18 +24,43 @@ contract TestRepublicIndustryElection {
         Assert.equal(res, true, "First vote should be counted");
     }
 
-    // function testDoubleVote() public payable {
-    //     RepublicIndustryElection election = new RepublicIndustryElection(DeployedAddresses.NetworkAccessToken(), "AI & IoT");
+    function testEmptyVote() public payable {
+        RepublicIndustryElection election = new RepublicIndustryElection(DeployedAddresses.NetworkAccessToken(), "AI & IoT");
 
-    //     election.start();
+        election.start();
 
-    //     address nominee = 0xf17f52151EbEF6C7334FAD080c5704D77216b732;
-    //     election.vote(nominee);
+        User nominee = new User();
+        address nomineeAddress = address(nominee);
 
-    //     bool res = election.vote(nominee);
+        nominee.registerAsNominee(election);
 
-    //     Assert.equal(res, false, "Re-votes should not be counted");
-    // }
+        bool res = election.vote(nomineeAddress);
+
+        Assert.equal(res, true, "First vote should be counted");
+    }
+
+    function testDoubleVote() public payable {
+        NetworkAccessToken token = new NetworkAccessToken();
+        RepublicIndustryElection election = new RepublicIndustryElection(address(token), "AI & IoT");
+
+        election.start();
+
+        User nominee = new User();
+
+        nominee.registerAsNominee(election);
+
+        ThrowProxy throwProxy = new ThrowProxy(address(election));
+
+        token.transferFrom(address(this), address(throwProxy), 10000);
+
+        RepublicIndustryElection(address(throwProxy)).vote(address(nominee));
+        throwProxy.execute.gas(200000)();
+
+        RepublicIndustryElection(address(throwProxy)).vote(address(nominee));
+        bool res = throwProxy.execute.gas(200000)();
+
+        Assert.equal(res, false, "Re-votes should not be counted");
+    }
 
     function testElectionNotStarted() public payable {
         RepublicIndustryElection election = new RepublicIndustryElection(DeployedAddresses.NetworkAccessToken(), "AI & IoT");
@@ -43,13 +68,12 @@ contract TestRepublicIndustryElection {
         // Election not started
 
         User nominee = new User();
-        address nomineeAddress = address(nominee);
 
         nominee.registerAsNominee(election);
 
         ThrowProxy throwProxy = new ThrowProxy(address(election));
 
-        RepublicIndustryElection(address(throwProxy)).vote(nomineeAddress);
+        RepublicIndustryElection(address(throwProxy)).vote(address(nominee));
         bool voteResult = throwProxy.execute.gas(200000)();
 
         Assert.equal(voteResult, false, "Vote should fail since election has not started");
@@ -61,11 +85,10 @@ contract TestRepublicIndustryElection {
         election.start();
 
         User nominee = new User();
-        address nomineeAddress = address(nominee);
 
         nominee.registerAsNominee(election);
 
-        bool voteResult = election.vote(nomineeAddress);
+        bool voteResult = election.vote(address(nominee));
 
         Assert.equal(voteResult, true, "Vote should succeed since election has started");
     }

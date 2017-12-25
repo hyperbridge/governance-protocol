@@ -25,32 +25,32 @@ contract RepublicPrimaryElection {
 
   mapping (address => bool) industryElection;
   RepublicIndustryElection[11] industryElections;
+  uint industryElectionIndex;
+  uint industryElectionLimit;
 
-  string[11] industries = [
-    "Logistics & Supply Chain",
-    "Education & Training",
-    "Environmental & Transportation",
-    "Agriculture & Food",
-    "Medical & Healthcare",
-    "AI & IoT",
-    "Software & Web Technology",
-    "Legal & Accounting",
-    "Social & Media",
-    "HR & Workforce",
-    "Health & Wellness"
-  ];
-  
   function RepublicPrimaryElection(address _natAddress) public {
     delegates[msg.sender] = true;
     natAddress = _natAddress;
+    industryElectionIndex = 0;
+    industryElectionLimit = 11;
+  }
 
-    for (uint256 i; i < industries.length; i++) {
-      industryElections[i] = new RepublicIndustryElection(natAddress, industries[i]);
+  function createIndustryElection(string _category) onlyDelegate public payable returns(bool res) {
+    require(industryElectionIndex < industryElectionLimit);
+
+    industryElections[industryElectionIndex] = new RepublicIndustryElection(natAddress, _category);
+
+    industryElectionIndex++;
+  }
+
+  function setIndustryElections(address[11] _elections) onlyDelegate public payable returns(bool res) {
+    for (uint i; i < _elections.length; i++) {
+      industryElections[i] = RepublicIndustryElection(_elections[i]);
     }
   }
 
   // TODO: add onlyDelegate modifier
-  function initRepublic(Republic _republic) public payable returns(bool res) {
+  function initRepublic(Republic _republic) onlyDelegate public payable returns(bool res) {
     republic = _republic;
     delegateAddresses = republic.getDelegateAddresses();
 
@@ -65,15 +65,15 @@ contract RepublicPrimaryElection {
     return republic.getDelegateAddresses();
   }
 
-  function start() public payable returns(bool res) {
-    for (uint256 i; i < industryElections.length; i++) {
-      industryElections[i].start();
-    }
+  function start() onlyDelegate public payable returns(bool res) {
+    // for (uint256 i; i < industryElections.length; i++) {
+    //   industryElections[i].start();
+    // }
 
     return true;
   }
 
-  function tallyVotes() public payable returns(uint256 res) {
+  function tallyVotes() onlyDelegate public payable returns(uint256 res) {
 
     return 1;
   }

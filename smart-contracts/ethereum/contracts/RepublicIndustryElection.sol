@@ -60,14 +60,13 @@ contract RepublicIndustryElection {
 
     // Sender should not be allowed to vote more than once
     require(nominees[_nominee][msg.sender] == 0);
-
     require(registeredNomineeAddresses[_nominee]);
 
     NetworkAccessToken token = NetworkAccessToken(natAddress);
+    uint256 balance = token.balanceOf(msg.sender);
 
-    nominees[_nominee][msg.sender] = token.balanceOf(msg.sender);
-    
-    nomineeVotes[_nominee] += token.balanceOf(msg.sender);
+    nominees[_nominee][msg.sender] = balance;
+    nomineeVotes[_nominee] += balance;
 
     return true;
   }
