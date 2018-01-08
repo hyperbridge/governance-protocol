@@ -1,6 +1,7 @@
 pragma solidity ^0.4.15;
 
 import "./RepublicPrimaryElection.sol";
+import "./User.sol";
 
 /**
  * The Republic contract:
@@ -8,7 +9,7 @@ import "./RepublicPrimaryElection.sol";
  */
 contract Republic {
   modifier onlyDelegate() {
-    require(delegates[msg.sender]);
+    require(msg.sender == owner || delegates[msg.sender]);
     _;
   }
 
@@ -19,49 +20,81 @@ contract Republic {
     string url;
   }
 
+  address owner;
   address natAddress;
 
   mapping (address => bool) delegates;
   address[11] delegateAddresses;
-  uint256 currentDelegateIndex;
+  uint currentDelegateIndex;
 
   mapping (address => bool) elections;
-  address[] electionAddresses;
-  uint256 currentElectionIndex;
+  address[100] electionAddresses;
+  uint currentElectionIndex;
+
+  event RepublicAddDelegate();
+  event RepublicCreateElection();
+  event RepublicStartElection();
+  event RepublicEndElection();
 
   function Republic(address _natAddress) public {
-    addDelegate(msg.sender);
+    owner = msg.sender;
     natAddress = _natAddress;
+    currentElectionIndex = 0;
+    currentDelegateIndex = 0;
   }
 
   function addDelegate(address _delegate) public payable returns(bool res) {
     delegates[_delegate] = true;
     delegateAddresses[currentDelegateIndex] = _delegate;
     currentDelegateIndex++;
+
+    RepublicAddDelegate();
     
     return true;
   }
 
-  function getDelegateAddresses() public view returns(address[11] res) {
+  function getDelegates() public view returns(address[11] res) {
     return delegateAddresses;
   }
 
-  function startElection() onlyDelegate public view returns(RepublicPrimaryElection res) {
+  function createUser() public payable returns(address res) {
+      User user = new User();
+
+      return user;
+  }
+
+  function createElection() onlyDelegate public payable returns(RepublicPrimaryElection res) {
     RepublicPrimaryElection election = new RepublicPrimaryElection(natAddress);
 
-    electionAddresses.push(election);
-    currentElectionIndex = electionAddresses.length - 1;
-    elections[election] = true;
+    election.initRepublic(this);
 
-    election.start();
-    
+    elections[address(election)] = true;
+    electionAddresses[currentElectionIndex] = address(election);
+    currentElectionIndex++;
+
+    RepublicCreateElection();
+
     return election;
   }
 
-  function endElection() onlyDelegate public view returns(bool res) {
-    RepublicPrimaryElection currentElection = RepublicPrimaryElection(electionAddresses[currentElectionIndex]);
+  function getElection() public view returns(address res) {
+    return electionAddresses[currentElectionIndex - 1];
+  }
 
-    uint256 electionResult = currentElection.tallyVotes();
+  function startElection() onlyDelegate public payable returns(bool res) {
+    RepublicPrimaryElection currentElection = RepublicPrimaryElection(electionAddresses[currentElectionIndex - 1]);
+
+    currentElection.start();
+
+    RepublicStartElection();
+
+    return true;
+  }
+
+  function endElection() onlyDelegate public payable returns(bool res) {
+    RepublicPrimaryElection currentElection = RepublicPrimaryElection(electionAddresses[currentElectionIndex - 1]);
+
+    uint electionResult = currentElection.tallyVotes();
 
     if (electionResult == 1) {
         // Successful election
@@ -70,6 +103,8 @@ contract Republic {
         // Log unsuccessful election reason
 
     }
+
+    RepublicEndElection();
 
     return true;
   }

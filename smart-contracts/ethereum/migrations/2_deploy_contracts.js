@@ -6,6 +6,5 @@ var RepublicIndustryElection = artifacts.require("./RepublicIndustryElection.sol
 
 module.exports = function (deployer) {
     deployer.deploy(NetworkAccessToken);
-    deployer.deploy(User);
     deployer.deploy(Republic);
 };

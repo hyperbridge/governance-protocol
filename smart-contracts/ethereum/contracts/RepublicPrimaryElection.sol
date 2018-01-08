@@ -13,92 +13,123 @@ import "./RepublicIndustryElection.sol";
  */
 contract RepublicPrimaryElection {
   modifier onlyDelegate() {
-    require(delegates[msg.sender]);
+    require(msg.sender == owner || delegates[msg.sender]);
     _;
   }
 
+  address owner;
   Republic republic;
   address natAddress;
+  bool started;
 
   mapping (address => bool) delegates;
   address[11] delegateAddresses;
 
   mapping (address => bool) industryElection;
-  RepublicIndustryElection[11] industryElections;
+  address[11] industryElections;
   uint industryElectionIndex;
   uint industryElectionLimit;
 
+  event RepublicPrimaryElectionCreateIndustryElection();
+  event RepublicPrimaryElectionSetIndustryElections();
+  event RepublicPrimaryElectionInitRepublic();
+  event RepublicPrimaryElectionTallyVotes();
+  event RepublicPrimaryElectionStart();
+  event RepublicPrimaryElectionEnd();
+
   function RepublicPrimaryElection(address _natAddress) public {
-    delegates[msg.sender] = true;
+    owner = msg.sender;
     natAddress = _natAddress;
     industryElectionIndex = 0;
     industryElectionLimit = 11;
+    started = false;
   }
 
   function createIndustryElection(string _category) onlyDelegate public payable returns(bool res) {
+    require(!started);
     require(industryElectionIndex < industryElectionLimit);
 
-    industryElections[industryElectionIndex] = new RepublicIndustryElection(natAddress, _category);
+    RepublicIndustryElection election = new RepublicIndustryElection(natAddress, _category);
+    election.initRepublic(republic);
+
+    industryElections[industryElectionIndex] = address(election);
 
     industryElectionIndex++;
+
+    RepublicPrimaryElectionCreateIndustryElection();
+
+    return true;
   }
 
   function setIndustryElections(address[11] _elections) onlyDelegate public payable returns(bool res) {
-    for (uint i; i < _elections.length; i++) {
-      industryElections[i] = RepublicIndustryElection(_elections[i]);
-    }
+    industryElections = _elections;
+
+    RepublicPrimaryElectionSetIndustryElections();
   }
 
   // TODO: add onlyDelegate modifier
   function initRepublic(Republic _republic) onlyDelegate public payable returns(bool res) {
     republic = _republic;
-    delegateAddresses = republic.getDelegateAddresses();
+    delegateAddresses = republic.getDelegates();
 
-    for (uint256 i; i < delegateAddresses.length; i++) {
+    for (uint i; i < delegateAddresses.length; i++) {
       delegates[delegateAddresses[i]] = true;
     }
+
+    RepublicPrimaryElectionInitRepublic();
 
     return true;
   }
 
-  function getDelegateAddresses() public view returns(address[11] res) {
-    return republic.getDelegateAddresses();
+  function getDelegates() public view returns(address[11] res) {
+    return delegateAddresses;
   }
 
   function start() onlyDelegate public payable returns(bool res) {
-    // for (uint256 i; i < industryElections.length; i++) {
-    //   industryElections[i].start();
-    // }
+    require (!started);
+
+    for (uint i; i < industryElections.length; i++) {
+      if (industryElections[i] == 0) {continue;}
+
+      RepublicIndustryElection(industryElections[i]).start();
+    }
+
+    started = true;
+
+    RepublicPrimaryElectionStart();
 
     return true;
   }
 
   function tallyVotes() onlyDelegate public payable returns(uint256 res) {
+    require (started);
+
+    RepublicPrimaryElectionTallyVotes();
 
     return 1;
   }
 
   function end() onlyDelegate public view returns(address[] res) {
+    require (started);
+
     address[] memory industryWinnerAddresses = new address[](11);
 
-    // End the industry elections
+    // RepublicPrimaryElectionEnd the industry elections
     // Choose the top 11 industry winners as the delegates
     for (uint256 i; i < industryElections.length; i++) {
-      address winner1 = industryElections[i].end();
+      if (industryElections[i] == 0) {continue;}
+      
+      address winner1 = RepublicIndustryElection(industryElections[i]).end();
 
       industryWinnerAddresses[i] = winner1;
     }
 
-    for (uint256 j; j < industryElections.length; j++) {
-      address winner2 = industryElections[j].end();
-
-      industryWinnerAddresses[j] = winner2;
-    }
+    RepublicPrimaryElectionEnd();
 
     return industryWinnerAddresses;
   }
 
-  function getIndustryElections() public view returns(RepublicIndustryElection[11] res) {
+  function getIndustryElections() public view returns(address[11] res) {
     return industryElections;
   }
 }
