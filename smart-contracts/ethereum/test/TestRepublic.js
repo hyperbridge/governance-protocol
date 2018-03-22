@@ -57,7 +57,7 @@ contract('Republic', function (accounts) {
         var nominee1 = await _republic.createUser();//{ from: owner });
         var nominee2 = await _republic.createUser();//{ from: owner });
         nominee1 = await new User(nominee1);
-        nominee2 = await new User(nominee2);
+        nominee2 = await new User(nominee2); 
 
         console.log(10, nominee1, nominee2, industryElection1);
         //await nominee1.registerAsNominee.call(industryElection1, { from: owner });
